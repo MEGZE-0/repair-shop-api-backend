@@ -1,0 +1,368 @@
+API Documentation for Mobile and PC Repair Shop
+Base URL
+bash
+Copy code
+http://localhost:5000/api
+Authentication
+All routes (except for registration and login) require authentication via a JSON Web Token (JWT). Obtain a token by logging in with the credentials of a registered user.
+
+1. User Authentication
+1.1 Register User
+Endpoint: POST /auth/register
+Description: Register a new user (admin, staff, or client).
+Request Body:
+json
+Copy code
+{
+    "username": "string",
+    "password": "string",
+    "email": "string",
+    "role": "admin | staff | client"
+}
+Responses:
+201 Created:
+json
+Copy code
+{
+    "message": "User registered successfully"
+}
+400 Bad Request:
+json
+Copy code
+{
+    "message": "User already exists"
+}
+500 Internal Server Error:
+json
+Copy code
+{
+    "message": "Error registering user"
+}
+1.2 Login User
+Endpoint: POST /auth/login
+Description: Log in a user and obtain a JWT.
+Request Body:
+json
+Copy code
+{
+    "username": "string",
+    "password": "string"
+}
+Responses:
+200 OK:
+json
+Copy code
+{
+    "token": "jwt_token",
+    "role": "user_role"
+}
+401 Unauthorized:
+json
+Copy code
+{
+    "message": "Invalid credentials"
+}
+500 Internal Server Error:
+json
+Copy code
+{
+    "message": "Error logging in"
+}
+2. Device Management
+2.1 Add Device
+Endpoint: POST /devices
+
+Description: Add a new device for the authenticated user.
+
+Headers:
+
+Authorization: Bearer <token>
+Request Body:
+
+json
+Copy code
+{
+    "type": "string",
+    "model": "string",
+    "status": "in repair | repaired | picked up",
+    "repairDetails": "string"
+}
+Responses:
+201 Created:
+json
+Copy code
+{
+    "_id": "device_id",
+    "owner": "user_id",
+    "type": "string",
+    "model": "string",
+    "status": "in repair",
+    "repairDetails": "string",
+    "createdAt": "timestamp",
+    "updatedAt": "timestamp"
+}
+401 Unauthorized:
+json
+Copy code
+{
+    "message": "Unauthorized"
+}
+403 Forbidden:
+json
+Copy code
+{
+    "message": "Access denied"
+}
+500 Internal Server Error:
+json
+Copy code
+{
+    "message": "Error adding device"
+}
+2.2 Get Devices
+Endpoint: GET /devices
+
+Description: Retrieve all devices associated with the authenticated user.
+
+Headers:
+
+Authorization: Bearer <token>
+Responses:
+
+200 OK:
+json
+Copy code
+[
+    {
+        "_id": "device_id",
+        "owner": "user_id",
+        "type": "string",
+        "model": "string",
+        "status": "in repair",
+        "repairDetails": "string",
+        "createdAt": "timestamp",
+        "updatedAt": "timestamp"
+    },
+    ...
+]
+401 Unauthorized:
+json
+Copy code
+{
+    "message": "Unauthorized"
+}
+2.3 Update Device Status
+Endpoint: PUT /devices/:id/status
+
+Description: Update the status of a specific device.
+
+Headers:
+
+Authorization: Bearer <token>
+Request Body:
+
+json
+Copy code
+{
+    "status": "in repair | repaired | picked up"
+}
+Responses:
+200 OK:
+json
+Copy code
+{
+    "_id": "device_id",
+    "owner": "user_id",
+    "type": "string",
+    "model": "string",
+    "status": "updated_status",
+    "repairDetails": "string",
+    "createdAt": "timestamp",
+    "updatedAt": "timestamp"
+}
+401 Unauthorized:
+json
+Copy code
+{
+    "message": "Unauthorized"
+}
+403 Forbidden:
+json
+Copy code
+{
+    "message": "Access denied"
+}
+500 Internal Server Error:
+json
+Copy code
+{
+    "message": "Error updating device status"
+}
+3. Repair Management
+3.1 Add Repair
+Endpoint: POST /repairs
+
+Description: Add a new repair entry for a device.
+
+Headers:
+
+Authorization: Bearer <token>
+Request Body:
+
+json
+Copy code
+{
+    "device": "device_id",
+    "progress": "string",
+    "expectedCompletion": "YYYY-MM-DD",
+    "notes": "string"
+}
+Responses:
+201 Created:
+json
+Copy code
+{
+    "_id": "repair_id",
+    "device": "device_id",
+    "progress": "string",
+    "expectedCompletion": "timestamp",
+    "notes": "string",
+    "createdAt": "timestamp",
+    "updatedAt": "timestamp"
+}
+401 Unauthorized:
+json
+Copy code
+{
+    "message": "Unauthorized"
+}
+403 Forbidden:
+json
+Copy code
+{
+    "message": "Access denied"
+}
+500 Internal Server Error:
+json
+Copy code
+{
+    "message": "Error adding repair"
+}
+3.2 Get Repair Status
+Endpoint: GET /repairs/:deviceId
+
+Description: Retrieve all repair entries for a specific device.
+
+Headers:
+
+Authorization: Bearer <token>
+Responses:
+
+200 OK:
+json
+Copy code
+[
+    {
+        "_id": "repair_id",
+        "device": "device_id",
+        "progress": "string",
+        "expectedCompletion": "timestamp",
+        "notes": "string",
+        "createdAt": "timestamp",
+        "updatedAt": "timestamp"
+    },
+    ...
+]
+401 Unauthorized:
+json
+Copy code
+{
+    "message": "Unauthorized"
+}
+Testing with Postman
+Steps to Test Each Endpoint
+Open Postman.
+
+Select the request type (GET, POST, PUT) as indicated above.
+
+Enter the appropriate URL.
+
+Set up Headers (for routes requiring authentication):
+
+Key: Authorization
+Value: Bearer <your_jwt_token>
+For POST and PUT requests, go to the Body tab:
+
+Select raw and set the type to JSON.
+Enter the required JSON body as shown in the request body section.
+Click on Send.
+
+Example Test Cases
+Register a User:
+
+URL: POST http://localhost:5000/api/auth/register
+Body:
+json
+Copy code
+{
+    "username": "testUser",
+    "password": "testPassword",
+    "email": "test@example.com",
+    "role": "client"
+}
+Login the User:
+
+URL: POST http://localhost:5000/api/auth/login
+Body:
+json
+Copy code
+{
+    "username": "testUser",
+    "password": "testPassword"
+}
+Add a Device:
+
+URL: POST http://localhost:5000/api/devices
+Headers: Add the JWT token in Authorization.
+Body:
+json
+Copy code
+{
+    "type": "Mobile",
+    "model": "iPhone 12",
+    "status": "in repair",
+    "repairDetails": "Screen replacement"
+}
+Get Devices:
+
+URL: GET http://localhost:5000/api/devices
+Headers: Add the JWT token in Authorization.
+Update Device Status:
+
+URL: PUT http://localhost:5000/api/devices/<device_id>/status
+Headers: Add the JWT token in Authorization.
+Body:
+json
+Copy code
+{
+    "status": "repaired"
+}
+Add a Repair:
+
+URL: POST http://localhost:5000/api/repairs
+Headers: Add the JWT token in Authorization.
+Body:
+json
+Copy code
+{
+    "device": "<device_id>",
+    "progress": "Replaced the screen",
+    "expectedCompletion": "2024-10-20",
+    "notes": "Waiting for parts"
+}
+Get Repair Status:
+
+URL: GET http://localhost:5000/api/repairs/<device_id>
+Headers: Add the JWT token in Authorization.
+Error Handling
+Ensure to test error scenarios (e.g., invalid credentials, missing fields) to verify that your API responds correctly to errors.
